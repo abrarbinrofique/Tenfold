@@ -57,13 +57,14 @@ const matrix: Record<string, (number | null)[]> = {
 
 function statusFor(mId: string, v: number | null): "on" | "off" | "pending" {
   if (v == null) return "pending";
-  const m = metrics.find((x) => x.id === mId)!;
-  switch (m.goalOp) {
-    case "gte": return v >= m.goal ? "on" : "off";
-    case "lte": return v <= m.goal ? "on" : "off";
-    case "eq": return v === m.goal ? "on" : "off";
-    case "between": return v >= m.goal && v <= (m.goalMax ?? m.goal) ? "on" : "off";
-  }
+  const m = metrics.find((x) => x.id === mId) as import("./types").Metric | undefined;
+  if (!m) return "pending";
+  const op = m.goalOp;
+  if (op === "gte") return v >= m.goal ? "on" : "off";
+  if (op === "lte") return v <= m.goal ? "on" : "off";
+  if (op === "eq") return v === m.goal ? "on" : "off";
+  if (op === "between") return v >= m.goal && v <= (m.goalMax ?? m.goal) ? "on" : "off";
+  return "off";
 }
 
 export const demoScorecard: ScorecardData = {
