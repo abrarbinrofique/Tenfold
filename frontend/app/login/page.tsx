@@ -35,7 +35,8 @@ export default function LoginPage() {
         credentials: "include",
         body: JSON.stringify({ email: v.email }),
       });
-      if (!r.ok) throw new Error("login failed");
+      if (r.status === 401) { toast.error("Unknown email. Try avery@acme.test"); setLoading(false); return; }
+      if (!r.ok) { toast.error(`Backend error ${r.status}. API: ${base}`); setLoading(false); return; }
       const payload = await r.json().catch(() => null);
       const token = payload?.token;
       if (token && typeof window !== "undefined") {
@@ -46,8 +47,8 @@ export default function LoginPage() {
       const data = me.ok ? await me.json() : null;
       const teamId = data?.teams?.[0]?.id ?? "team_lead";
       router.push(`/team/${teamId}`);
-    } catch {
-      toast.error("Unknown email. Try avery@acme.test");
+    } catch (e: any) {
+      toast.error(`Network error: ${e?.message ?? "unknown"}. API: ${base}`);
     } finally {
       setLoading(false);
     }
