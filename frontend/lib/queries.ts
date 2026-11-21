@@ -89,6 +89,10 @@ export function useMeeting(id: string) {
     queryKey: qk.meeting(id),
     queryFn: () => apiGet<Meeting & any>(`/meetings/${id}`),
     enabled: !!id,
+    // WebSocket is the primary sync path; this short poll is a safety net
+    // so section advances still land on peers within 3s even if WS drops.
+    refetchInterval: 3000,
+    refetchIntervalInBackground: false,
   });
 }
 
