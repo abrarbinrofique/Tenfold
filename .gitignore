@@ -1,0 +1,47 @@
+# dependencies
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# builds
+.next/
+dist/
+build/
+*.egg-info/
+out/
+
+# env & secrets
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# docker volumes
+pgdata/
+*.db
+
+# playwright
+test-results/
+playwright-report/
+.playwright/
+# NOTE: keep e2e/trace.zip committed as the required failure artifact
+
+# project-specific
+seed (1).json
+assessment-brief.docx
+mail.txt
+PROJECT_GUIDE.md
+*.log
