@@ -27,8 +27,16 @@ async def login(body: LoginIn, response: Response, db: AsyncSession = Depends(ge
     if not user:
         raise HTTPException(401, "unknown email")
     token = create_token(user.id)
+    # Cross-site cookie: Vercel (web) → Render (api). Requires SameSite=None + Secure.
+    # In local dev (http), fall back to Lax so cookies work without TLS.
+    from app.core.config import settings
+    is_cross_site = settings.cors_origin.startswith("https://")
     response.set_cookie(
-        "tenfold_token", token, httponly=True, samesite="lax", max_age=60 * 60 * 24,
+        "tenfold_token", token,
+        httponly=True,
+        samesite="none" if is_cross_site else "lax",
+        secure=is_cross_site,
+        max_age=60 * 60 * 24,
     )
     return {"token": token, "user": {"id": user.id, "name": user.name, "email": user.email, "role": user.role}}
 
