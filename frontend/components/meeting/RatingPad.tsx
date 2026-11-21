@@ -31,14 +31,14 @@ export function RatingPad({
               onMouseLeave={() => setHover(null)}
               onClick={() => !disabled && onChange?.(n)}
               className={cn(
-                "aspect-square rounded-md border font-serif text-lg flex items-center justify-center transition-colors",
+                "aspect-square min-h-[48px] rounded-md border font-serif text-[22px] font-light tabular-nums tnum flex items-center justify-center transition-colors leading-none",
                 disabled
-                  ? "border-[var(--hair)] text-muted/40 bg-muted/5 cursor-not-allowed"
+                  ? "border-[var(--hair)] text-muted/50 bg-muted/5 cursor-not-allowed"
                   : selected
                     ? "bg-ink text-bg border-ink"
                     : active
-                      ? "bg-ink/70 text-bg border-ink"
-                      : "text-fg/70 border-[var(--hair)] hover:border-ink/50",
+                      ? "bg-ink/80 text-bg border-ink"
+                      : "text-fg border-[var(--hair-strong)] hover:border-ink hover:bg-fg/[0.04]",
               )}
             >
               {n}

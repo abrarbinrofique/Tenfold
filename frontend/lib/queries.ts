@@ -158,7 +158,25 @@ export function usePatchIssue(teamId: string) {
   return useMutation({
     mutationFn: (v: { id: string; patch: { priority?: number; title?: string } }) =>
       apiPatch(`/issues/${v.id}`, v.patch),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["issues", teamId] }),
+    onMutate: async (v) => {
+      const key = qk.issues(teamId, false);
+      await qc.cancelQueries({ queryKey: key });
+      const prev = qc.getQueryData<any>(key);
+      qc.setQueryData<any>(key, (old: any) => {
+        if (!old?.issues) return old;
+        return {
+          ...old,
+          issues: old.issues.map((i: any) =>
+            i.id === v.id ? { ...i, ...v.patch } : i,
+          ),
+        };
+      });
+      return { prev, key };
+    },
+    onError: (_e, _v, ctx) => {
+      if (ctx?.prev) qc.setQueryData(ctx.key, ctx.prev);
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: ["issues", teamId] }),
   });
 }
 

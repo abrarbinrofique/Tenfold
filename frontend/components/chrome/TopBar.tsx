@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ChevronDown, Command, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,6 +33,8 @@ export function TopBar({
   onCommandK?: () => void;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const inMeeting = pathname?.startsWith("/meeting/");
   const { data: me } = useMe();
   const teams = teamsProp ?? me?.teams ?? [];
   const teamName = teamNameProp ?? teams[0]?.name ?? "Team";
@@ -107,7 +109,7 @@ export function TopBar({
             <Kbd>⌘K</Kbd>
           </Button>
 
-          {me?.role !== "observer" && (
+          {me?.role !== "observer" && !inMeeting && (
             <Button
               variant="primary"
               size="sm"
