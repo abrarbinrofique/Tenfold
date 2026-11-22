@@ -53,6 +53,7 @@ export default function MeetingPage() {
   const join = useJoinMeeting(meetingId);
   const advance = useAdvance(meetingId);
   const end = useEnd(meetingId);
+  const [endConfirm, setEndConfirm] = useState(false);
   const rate = useRate(meetingId);
 
   const joined = useRef(false);
@@ -109,12 +110,27 @@ export default function MeetingPage() {
         ? "Advance to Conclude"
         : "End meeting";
 
+  function performEnd() {
+    end.mutate(undefined, {
+      onSuccess: () => { toast.success("Meeting concluded"); setEndConfirm(false); },
+      onError: (e: any) => toast.error(e?.message ?? "Could not end"),
+    });
+  }
+
   function onAdvance() {
     if (section === "conclude") {
-      end.mutate(undefined, {
-        onSuccess: () => toast.success("Meeting concluded"),
-        onError: (e: any) => toast.error(e?.message ?? "Could not end"),
-      });
+      // Count non-observer attendees who haven't rated yet (observers don't rate per spec).
+      const attendees: any[] = (meeting as any).attendees ?? [];
+      const observerIds = new Set(
+        (teamDto?.members ?? []).filter((m: any) => m.role === "observer").map((m: any) => m.id),
+      );
+      const ratable = attendees.filter((a) => !observerIds.has(a.user_id));
+      const unrated = ratable.filter((a) => a.rating == null);
+      if (unrated.length > 0) {
+        setEndConfirm(true);
+        return;
+      }
+      performEnd();
     } else {
       advance.mutate(undefined, {
         onError: (e: any) => toast.error(e?.message ?? "Could not advance"),
@@ -212,6 +228,34 @@ export default function MeetingPage() {
 
         <AttendeeRail meeting={meetingForRail} users={users} />
       </div>
+
+      {endConfirm && (() => {
+        const attendees: any[] = (meeting as any).attendees ?? [];
+        const observerIds = new Set(
+          (teamDto?.members ?? []).filter((m: any) => m.role === "observer").map((m: any) => m.id),
+        );
+        const unrated = attendees.filter((a) => !observerIds.has(a.user_id) && a.rating == null);
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setEndConfirm(false)}>
+            <div onClick={(e) => e.stopPropagation()} className="max-w-md w-full mx-4 bg-bg border border-[var(--hair-strong)] rounded-md p-6 shadow-2xl">
+              <div className="caps mb-2">§ Confirm</div>
+              <h3 className="font-serif text-[24px] font-light leading-tight mb-3">End meeting?</h3>
+              <p className="text-[13px] text-fg/80 mb-4">
+                <strong>{unrated.length}</strong> of {attendees.filter(a => !observerIds.has(a.user_id)).length} attendees haven't rated yet. They won't be able to rate once the meeting ends.
+              </p>
+              <ul className="mb-5 text-[13px] text-muted space-y-0.5">
+                {unrated.map((a) => (
+                  <li key={a.user_id} className="font-mono text-[11px] uppercase tracking-[0.12em]">· {a.name}</li>
+                ))}
+              </ul>
+              <div className="flex justify-end gap-2">
+                <button onClick={() => setEndConfirm(false)} className="px-3 h-8 text-[13px] rounded-md text-fg/80 hover:bg-fg/[0.05]">Wait</button>
+                <button onClick={performEnd} className="px-3 h-8 text-[13px] rounded-md bg-ink text-bg hover:opacity-90">End anyway</button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
