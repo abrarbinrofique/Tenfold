@@ -35,7 +35,15 @@ export default function MeetingPage() {
   const qc = useQueryClient();
   const meetingId = params.meetingId;
 
-  const { data: me } = useMe();
+  const { data: me, isLoading: meLoading, isError: meError } = useMe();
+
+  // Auth gate — redirect to /login if not authenticated.
+  useEffect(() => {
+    if (!meLoading && (meError || !me)) {
+      router.replace("/login");
+    }
+  }, [meLoading, meError, me, router]);
+
   const { data: meeting } = useMeeting(meetingId);
   const teamId = meeting?.team_id;
   const { data: teamDto } = useTeam(teamId ?? "");

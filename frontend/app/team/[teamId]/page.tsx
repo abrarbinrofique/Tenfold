@@ -56,7 +56,15 @@ export default function TeamPage() {
 
   const teamId = params.teamId;
 
-  const { data: me } = useMe();
+  const { data: me, isLoading: meLoading, isError: meError } = useMe();
+
+  // Auth gate — redirect to /login if not authenticated.
+  useEffect(() => {
+    if (!meLoading && (meError || !me)) {
+      router.replace("/login");
+    }
+  }, [meLoading, meError, me, router]);
+
   const { data: nowInfo } = useNow();
   const { data: activeMeetingData } = useActiveMeeting(teamId);
   const activeMeeting = activeMeetingData?.active ?? null;
