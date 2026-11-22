@@ -2,7 +2,10 @@
 
 A two-page EOS Level-10 meeting workspace. Built for the Altri Senior AI-First Software Engineer assessment.
 
-See [AI_WORKFLOW.md](./AI_WORKFLOW.md) for a full note on how Claude was used.
+- **Live app**: https://tenfold-phi.vercel.app/login
+- **Design showcase**: https://tenfold-phi.vercel.app/_showcase
+- **Decision record**: [DECISION_RECORD.md](./DECISION_RECORD.md)
+- **AI workflow note**: [AI_WORKFLOW.md](./AI_WORKFLOW.md)
 
 ---
 
