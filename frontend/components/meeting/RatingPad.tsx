@@ -30,15 +30,19 @@ export function RatingPad({
               onMouseEnter={() => !disabled && setHover(n)}
               onMouseLeave={() => setHover(null)}
               onClick={() => !disabled && onChange?.(n)}
-              className={cn(
-                "aspect-square min-h-[48px] rounded-md border font-serif text-[22px] font-light tabular-nums tnum flex items-center justify-center transition-colors leading-none",
+              style={
                 disabled
-                  ? "border-[var(--hair)] text-muted/50 bg-muted/5 cursor-not-allowed"
+                  ? { background: "transparent", color: "var(--muted)", opacity: 0.4 }
                   : selected
-                    ? "bg-ink text-bg border-ink"
+                    ? { background: "var(--ink)", color: "var(--bg)", borderColor: "var(--ink)" }
                     : active
-                      ? "bg-ink/80 text-bg border-ink"
-                      : "text-fg border-[var(--hair-strong)] hover:border-ink hover:bg-fg/[0.04]",
+                      ? { background: "var(--ink)", color: "var(--bg)", borderColor: "var(--ink)", opacity: 0.85 }
+                      : { background: "transparent", color: "var(--fg)", borderColor: "var(--hair-strong)" }
+              }
+              className={cn(
+                "aspect-square min-h-[52px] min-w-[36px] rounded-md border-2 font-serif text-[24px] font-normal tabular-nums flex items-center justify-center transition-all leading-none select-none",
+                disabled && "cursor-not-allowed",
+                !disabled && "hover:opacity-100 cursor-pointer",
               )}
             >
               {n}
