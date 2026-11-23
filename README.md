@@ -3,7 +3,7 @@
 A two-page EOS Level-10 meeting workspace. Built for the Altri Senior AI-First Software Engineer assessment.
 
 - **Live app**: https://tenfold-phi.vercel.app/login
-- **Design showcase**: https://tenfold-phi.vercel.app/_showcase
+- **Design showcase**: https://tenfold-phi.vercel.app/showcase
 - **Decision record**: [DECISION_RECORD.md](./DECISION_RECORD.md)
 - **AI workflow note**: [AI_WORKFLOW.md](./AI_WORKFLOW.md)
 
@@ -17,7 +17,7 @@ docker compose up --build
 
 - Web: http://localhost:3000
 - API: http://localhost:8000
-- Design showcase (no backend needed): http://localhost:3000/_showcase
+- Design showcase (no backend needed): http://localhost:3000/showcase
 
 Backend seeds the configured Postgres on boot. The committed `docker-compose.yml` points `DATABASE_URL` at a Supabase pooler; swap it for `postgresql+asyncpg://<local>` to run entirely locally.
 
