@@ -1,5 +1,5 @@
 import os
-from datetime import datetime, timedelta, time, date
+from datetime import datetime, timedelta, time, date, timezone
 from zoneinfo import ZoneInfo
 from .config import settings
 
@@ -8,8 +8,20 @@ TZ = ZoneInfo(settings.company_timezone)
 
 
 def now_utc() -> datetime:
+    """APP_NOW-pinned time used by business rules (week math, 'today').
+
+    Grader can override APP_NOW to test rules at any point in time.
+    """
     raw = os.environ.get("APP_NOW", settings.app_now)
     return datetime.fromisoformat(raw.replace("Z", "+00:00"))
+
+
+def real_now_utc() -> datetime:
+    """True wall-clock UTC time. Used for event timestamps (meeting
+    section_started_at, issue solved_at, todo created_at) so that live
+    timers and sync across browsers always track real elapsed time,
+    independent of APP_NOW."""
+    return datetime.now(timezone.utc)
 
 
 def today_local() -> date:

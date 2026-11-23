@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
 from app.api.deps import require_write, require_team_access
 from app.schemas.common import TodoPatchIn
-from app.core.time import now_utc
+from app.core.time import real_now_utc
 from app import models as M
 
 router = APIRouter()
@@ -22,7 +22,7 @@ async def patch_todo(
         raise HTTPException(404)
     await require_team_access(t.team_id, user, db)
     if body.done is True and t.done_at is None:
-        t.done_at = now_utc()
+        t.done_at = real_now_utc()
     elif body.done is False:
         t.done_at = None
     if body.title is not None:

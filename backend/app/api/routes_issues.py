@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
 from app.api.deps import require_team_access, require_write, current_user, issue_team_id
 from app.schemas.common import IssueCreateIn, IssuePatchIn, IssueSolveIn, TodoCreateIn
-from app.core.time import now_utc
+from app.core.time import real_now_utc
 from app import models as M
 
 router = APIRouter()
@@ -62,7 +62,7 @@ async def solve_issue(
     await require_team_access(issue.team_id, user, db)
     if issue.solved_at is not None:
         return {"ok": True, "already": True}
-    issue.solved_at = now_utc()
+    issue.solved_at = real_now_utc()
     issue.resolution_note = body.note
     await db.commit()
     return {"ok": True}

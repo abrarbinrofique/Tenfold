@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db, AsyncSessionLocal
 from app.api.deps import require_team_access, require_write, current_user
-from app.core.time import now_utc, current_week_start
+from app.core.time import now_utc, real_now_utc, current_week_start
 from app.core.security import decode_token
 from app.schemas.common import RatingIn
 from app.ws.manager import hub
@@ -24,13 +24,14 @@ async def start_meeting(
     db: AsyncSession = Depends(get_db),
 ):
     await require_team_access(team_id, user, db)
-    now = now_utc()
+    # Event timestamps use real UTC so timers tick live and sync across browsers.
+    now = real_now_utc()
     mid = f"mt_{uuid.uuid4().hex[:10]}"
     m = M.Meeting(
         id=mid, team_id=team_id, facilitator_id=user.id,
         section="scorecard", section_started_at=now,
-        started_at=now,  # use APP_NOW anchor, not DB server clock
-        scorecard_week=current_week_start(),
+        started_at=now,
+        scorecard_week=current_week_start(),  # scorecard_week still APP_NOW-pinned (business rule)
     )
     db.add(m)
     db.add(M.MeetingAttendee(meeting_id=mid, user_id=user.id))
@@ -91,7 +92,7 @@ async def advance(
         raise HTTPException(409, "cannot advance past conclude; call /end")
     nxt = SECTION_ORDER[idx + 1]
     m.section = nxt
-    m.section_started_at = now_utc()
+    m.section_started_at = real_now_utc()
     await db.commit()
     await hub.publish(meeting_id, {
         "type": "section_changed", "section": nxt,
@@ -130,7 +131,7 @@ async def end(
     )).scalars().all()
 
     m.section = "ended"
-    m.ended_at = now_utc()
+    m.ended_at = real_now_utc()
     m.summary_snapshot = {
         "scorecard_week": str(m.scorecard_week) if m.scorecard_week else None,
         "issues_solved": sorted(list(issues_solved)),

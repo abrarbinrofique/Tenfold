@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/cn";
-import { useNow } from "@/lib/queries";
 
 const BUDGET: Record<string, number> = {
   scorecard: 5 * 60_000,
@@ -30,24 +29,15 @@ export function SectionTimer({
   section: string;
   sectionStartedAt: string;
 }) {
-  // Anchor to server's APP_NOW so elapsed is always based on server clock,
-  // not the user's wall clock (which drifts if APP_NOW is a fixed past date).
-  const { data: nowInfo } = useNow();
-  const anchorRef = useRef<{ server: number; client: number } | null>(null);
-  if (nowInfo?.now_utc && !anchorRef.current) {
-    anchorRef.current = { server: new Date(nowInfo.now_utc).getTime(), client: Date.now() };
-  }
-
+  // section_started_at is a real UTC timestamp from the server, so every
+  // browser computes the same elapsed regardless of when they mounted.
+  // Browser-clock drift against real time is bounded (<1 min typically).
   const [tick, setTick] = useState(() => Date.now());
   useEffect(() => {
     const t = setInterval(() => setTick(Date.now()), 500);
     return () => clearInterval(t);
   }, []);
-
-  const serverNow = anchorRef.current
-    ? anchorRef.current.server + (tick - anchorRef.current.client)
-    : tick;
-  const elapsed = serverNow - new Date(sectionStartedAt).getTime();
+  const elapsed = tick - new Date(sectionStartedAt).getTime();
   const budget = BUDGET[section] ?? 10 * 60_000;
   const over = elapsed > budget;
   const { mm, ss } = parts(elapsed);
