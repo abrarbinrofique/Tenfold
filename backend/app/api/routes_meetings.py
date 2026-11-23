@@ -29,6 +29,7 @@ async def start_meeting(
     m = M.Meeting(
         id=mid, team_id=team_id, facilitator_id=user.id,
         section="scorecard", section_started_at=now,
+        started_at=now,  # use APP_NOW anchor, not DB server clock
         scorecard_week=current_week_start(),
     )
     db.add(m)
