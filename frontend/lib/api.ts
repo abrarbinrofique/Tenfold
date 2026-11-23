@@ -22,6 +22,12 @@ export async function api<T = unknown>(
   if (hasBody && !headers["Content-Type"]) {
     headers["Content-Type"] = "application/json";
   }
+  // Fallback: Bearer token from localStorage for browsers that block
+  // third-party cookies (notably Chrome Incognito, Safari).
+  if (typeof window !== "undefined" && !headers["Authorization"]) {
+    const token = window.localStorage.getItem("tenfold_token");
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+  }
   const res = await fetch(`${API_BASE}${path}`, {
     credentials: "include",
     ...init,
